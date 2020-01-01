@@ -109,6 +109,13 @@ public class bullet : NetworkBehaviour  {
 
         }
 
+        if (other.gameObject.tag == "friendly")
+        {
+            Debug.Log("OI");
+            source.PlayOneShot(explodeSound, 1f);
+            other.gameObject.GetComponent<friendly>().getHit();
+        }
+
 
     }
     

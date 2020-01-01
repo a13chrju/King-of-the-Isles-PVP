@@ -25,19 +25,15 @@ public class cam : NetworkBehaviour {
         void LateUpdate()
         {
         // offset = Quaternion.AngleAxis(Input.GetAxis("Mouse Y") * turnSpeed, Vector3.up) ;
-       // Vector3 offsetwa = new Vector3(transform.position.x, transform.position.y, transform.position.z * Input.GetAxis("Mouse Y"));
+        // Vector3 offsetwa = new Vector3(transform.position.x, transform.position.y, transform.position.z * Input.GetAxis("Mouse Y"));
         //  transform.position = player.position + offset;
         //transform.LookAt(player.position);
 
-            
-        }
-
-    private void Update()
-    {
-        var y = Input.GetAxis("Mouse Y") * 6f;
-       // var x = Input.GetAxis("Mouse X") * 6f;
+        var y = Input.GetAxis("Mouse Y") * 3f;
+        // var x = Input.GetAxis("Mouse X") * 6f;
 
         camera.transform.Rotate(-y, 0, 0);
-
     }
+
+
 }

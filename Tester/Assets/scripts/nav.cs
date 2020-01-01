@@ -11,7 +11,7 @@ public class nav : MonoBehaviour {
     // Use this for initialization
     void Start () {
          agent = GetComponent<NavMeshAgent>();
-        agent.SetDestination(runaround[0].position);
+        agent.SetDestination(runaround[0].position); Delayedreached = Time.time + 2f;
     }
 	
 	// Update is called once per frame

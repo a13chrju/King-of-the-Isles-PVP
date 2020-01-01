@@ -11,10 +11,10 @@ namespace Prototype.NetworkLobby
     //Any LobbyHook can then grab it and pass those value to the game player prefab (see the Pong Example in the Samples Scenes)
     public class LobbyPlayer : NetworkLobbyPlayer
     {
-        static Color[] Colors = new Color[] { Color.red, Color.yellow };
+        static Color[] Colors = new Color[] { Color.red, Color.yellow, Color.green, Color.blue, new Color(142f / 255f, 53f / 255f, 229f / 255f), Color.black };
         //used on server to avoid assigning the same color to two player
         static List<int> _colorInUse = new List<int>();
-        private float increaseman = 0;
+        private int increaseman = 0;
         public GameObject myplayermodelpreviewer;
         public Button colorButton;
         public InputField nameInput;
@@ -37,10 +37,13 @@ namespace Prototype.NetworkLobby
         public Color OddRowColor = new Color(250.0f / 255.0f, 250.0f / 255.0f, 250.0f / 255.0f, 1.0f);
         public Color EvenRowColor = new Color(180.0f / 255.0f, 180.0f / 255.0f, 180.0f / 255.0f, 1.0f);
 
-        static Color JoinColor = new Color(255.0f/255.0f, 0.0f, 101.0f/255.0f,1.0f);
+        static Color JoinColor = new Color(42f / 255.0f, 170f / 255.0f, 234f / 255.0f, 1f);
         static Color NotReadyColor = new Color(34.0f / 255.0f, 44 / 255.0f, 55.0f / 255.0f, 1.0f);
-        static Color ReadyColor = new Color(0.0f, 204.0f / 255.0f, 204.0f / 255.0f, 1.0f);
+        static Color ReadyColor = new Color(0.0f, 0f / 0f, 0f / 0f, 1.0f);
         static Color TransparentColor = new Color(0, 0, 0, 0);
+        private GameObject canvas_txt_death;
+        private GameObject canvaschild;
+        public GameObject canvas_txt_leave_child;
 
         //static Color OddRowColor = new Color(250.0f / 255.0f, 250.0f / 255.0f, 250.0f / 255.0f, 1.0f);
         //static Color EvenRowColor = new Color(180.0f / 255.0f, 180.0f / 255.0f, 180.0f / 255.0f, 1.0f);
@@ -207,6 +210,11 @@ namespace Prototype.NetworkLobby
             colorButton.GetComponent<Image>().color = newColor;
         }
 
+        public void ChangeTeamPicked(int value)
+        {
+            teampicked = value;
+        }
+
         //===== UI Handler
 
         //Note that those handler use Command function, as we need to change the value on the server not locally
@@ -214,23 +222,19 @@ namespace Prototype.NetworkLobby
         public void OnColorClicked()
         {
             increaseman++;
+            if (increaseman >= Colors.Length)
+            {
+                increaseman = 0;
+            }
             CmdColorChange(increaseman);
+           
 
-            if (increaseman % 2 == 0)
-            {
-                Material newMat = Resources.Load("red", typeof(Material)) as Material;
+            Material newMat = Resources.Load( "skin"+increaseman.ToString(), typeof(Material)) as Material;
 
-                Debug.Log("GOOOOOD" + newMat);
-                myplayermodelpreviewer.GetComponentInChildren<Renderer>().material = newMat;
+            Debug.Log("GOOOOOD" + newMat);
+            myplayermodelpreviewer.GetComponentInChildren<Renderer>().material = newMat;
 
-            }
-            else
-            {
-              
-                Material newMat = Resources.Load("yellow", typeof(Material)) as Material;
-                Debug.Log("GOOOOOD" + newMat);
-                myplayermodelpreviewer.GetComponentInChildren<Renderer>().material = newMat;
-            }
+
         }
 
         public void OnReadyClicked()
@@ -276,20 +280,14 @@ namespace Prototype.NetworkLobby
         //====== Server Command
 
         [Command]
-        public void CmdColorChange(float incerase)
+        public void CmdColorChange(int incerase)
         {
-            if (incerase % 2 == 0)
-            {
-                playerColor = Color.red;
-                
-            }
-            else
-            {
-                playerColor = Color.yellow;
 
-            }
+            playerColor = Colors[incerase];
+            ChangeTeamPicked(incerase);
 
-           
+
+
             /*
              int idx = System.Array.IndexOf(Colors, playerColor);
              idx++;
@@ -340,9 +338,41 @@ namespace Prototype.NetworkLobby
             playerName = name;
         }
 
+
+/*
+        [Command]
+        public void CmdAddCanvasLeftChild()
+        {
+            Debug.Log("TEST");
+            canvas_txt_death = GameObject.FindGameObjectWithTag("Battletext");
+            Debug.Log(canvas_txt_death.transform.parent.gameObject);
+            // GameObject fireball = (GameObject)Instantiate(fireball_prefab, posfire, this.GetComponentInChildren<Camera>().transform.rotation) as GameObject;
+
+            canvaschild = (GameObject)Instantiate(canvas_txt_leave_child, this.transform.position, canvas_txt_leave_child.transform.rotation) as GameObject;
+            
+
+
+            //  Debug.Log("hhej" + canvas_txt_death);
+
+            NetworkServer.Spawn(canvaschild);
+            RpcSyncBlockOnce(canvaschild, canvas_txt_death.transform.parent.gameObject);
+            //   canvaschilds.GetComponent<changemytext>().canvas_txt_death = canvas_txt_death;
+            // canvaschilds.GetComponent<changemytext>().changetext(this.gameObject.transform.name.ToString() + " DIED");
+        }
+
+        [ClientRpc]
+        public void RpcSyncBlockOnce(GameObject block, GameObject parent)
+        {
+            block.GetComponentInChildren<Text>().text = this.GetComponent<setup>().myname.ToString() + " DIED";
+            block.transform.parent = GameObject.FindGameObjectWithTag("Battletext").transform;
+        }
+        */
+
+
         //Cleanup thing when get destroy (which happen when client kick or disconnect)
         public void OnDestroy()
         {
+
             LobbyPlayerList._instance.RemovePlayer(this);
             if (LobbyManager.s_Singleton != null) LobbyManager.s_Singleton.OnPlayersNumberModified(-1);
 
@@ -359,6 +389,11 @@ namespace Prototype.NetworkLobby
                     break;
                 }
             }
+            string _ID = "DPlayer " + GetComponent<NetworkIdentity>().netId;
+
+            Debug.Log("SOME! LEFT DISSCONNECT" + _ID);
+            TeamManager.PlayerRemove(_ID);
         }
+
     }
 }

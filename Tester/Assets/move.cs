@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class move : NetworkBehaviour {
     public Rigidbody rb;
@@ -24,17 +25,39 @@ public class move : NetworkBehaviour {
     public Vector3 getpushed;
     public float fireballimpactspeed;
     public GameObject innerbone;
+    public float lookspeed;
 
     public GameObject water;
 
     public AudioClip jumpSound;
     private AudioSource source;
     private float timedelayjump;
-    private float canjump;
+    private float canjump = 0f;
     private float moveHorizontal, moveVertical;
     private Vector3 movHorizontal, movVertical;
 
+    private bl_Joystick Joystick;
+
+    private bool btnJump = false; 
     // Use this for initialization
+
+         public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+       // GameObject.Find("Sjukt").GetComponent<Button>().onClick.AddListener(() => CmdJump());
+     //   Debug.Log(GameObject.Find("Sjukt"));
+       // Application.targetFrameRate = 24;
+    }
+/*
+    [Command]
+    public void CmdJump()
+    {
+        Debug.Log("OOOwwwwww!");
+        RpcFireBoiJump();
+
+    }*/
+
+
     void Start() {
         if (isLocalPlayer)
         {
@@ -46,7 +69,7 @@ public class move : NetworkBehaviour {
             //Cursor.lockState = CursorLockMode.Locked;
             //Cursor.lockState = CursorLockMode.Confined;
             lastClickTime = Time.time;
-            
+           // Joystick = GameObject.FindGameObjectWithTag("Joystick").GetComponent<bl_Joystick>();
         }
         else
         {
@@ -125,19 +148,53 @@ public class move : NetworkBehaviour {
         movVertical = ((transform.forward * 0) * -1f);
     }
 
+ /*
+    //Client Side.   
+    [ClientRpc]
+    void RpcFireBoiJump()
+    {
+        Debug.Log("jump!");
+        if (Input.GetKeyDown("space") isLocalPlayer && IsGroundedTwo() && (Time.time > canjump))
+        {
+            Debug.Log("JUMP");
+            canjump = Time.time + 0.3f;
+            source.PlayOneShot(jumpSound, 1f);
+            rb.AddForce(Vector3.up * jumpforce);
+            Cmdjump();
+            jumpdelay = Time.time + 0.1f;
+            isjumping = true;
+        }
+    }
+*/
+
     void Update()
     {
         if (isLocalPlayer)
         {
-            
-                Vector3 offset = new Vector3(0, Input.GetAxis("Mouse X") * 5, 0);
-                rb.MoveRotation(rb.rotation * Quaternion.Euler(offset));
-            
+            moveHorizontal = Input.GetAxis("Horizontal") * -1f; //Joystick.Horizontal
+            moveVertical = Input.GetAxis("Vertical") * -1f; // Joystick.Vertical
+            movHorizontal = (transform.right * moveHorizontal) * -1f;
+            movVertical = ((transform.forward * moveVertical) * -1f);
+
+            rb.AddForce(Vector3.down * gravityscale, ForceMode.Force);
+
+            Vector3 Velocity = ((movHorizontal + movVertical).normalized) * MoveSpeed;
+            rb.MovePosition(rb.position + Velocity * Time.fixedDeltaTime);
+            Animating(moveHorizontal, moveVertical);
+
+        }
+
+        if (isLocalPlayer)
+        {
+            //for andriod use mouse X: Joystick.Horizontal
+            Vector3 offset = new Vector3(0, Input.GetAxis("Mouse X") * lookspeed, 0);
            
-            
-            if (Input.GetKeyDown("space") && IsGroundedTwo() && (Time.time > canjump))
+                rb.MoveRotation(rb.rotation * Quaternion.Euler(offset));
+
+            if (Input.GetKeyDown("space") && /*(Time.time > canjump)*/ IsGroundedTwo())
             {
-                canjump = Time.time + 0.3f;
+                Debug.Log("JUMP2");
+                canjump = Time.time + 0.5f;
                 source.PlayOneShot(jumpSound, 1f);
                 rb.AddForce(Vector3.up * jumpforce);
                 Cmdjump();
@@ -152,34 +209,7 @@ public class move : NetworkBehaviour {
     void FixedUpdate()
     {
 
-        if (isLocalPlayer)
-        {
-            moveHorizontal = Input.GetAxis("Horizontal") * -1;
-            moveVertical = Input.GetAxis("Vertical") * -1;
-            movHorizontal = (transform.right * moveHorizontal) * -1f;
-            movVertical = ((transform.forward * moveVertical) * -1f);
 
-            
-            rb.AddForce(Vector3.down * gravityscale, ForceMode.Acceleration);
-        }
-
-        if (isLocalPlayer)
-        {
-            //if (IsGroundedTwo())
-
-            if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)))
-            {
-                Vector3 Velocity = ((movHorizontal + movVertical).normalized * 3) * MoveSpeed;
-                rb.MovePosition(rb.position + Velocity * Time.fixedDeltaTime);
-                Animating(moveHorizontal, moveVertical);
-                // Animate the player.
-            }
-            else
-            {
-                Animating(0, 0);
-            }
-
-        }
 
     }
 
@@ -200,7 +230,10 @@ public class move : NetworkBehaviour {
          {
           //  Debug.Log(rb.velocity.y);
             anim.SetBool("isfalling", true);
-         }
+         }else if (rb.velocity.y > 40f && (IsGrounded() == false))
+        {
+            anim.SetBool("isfalling", true);
+        }
          else
          {
             if ((rb.velocity.y < 30f) && (Time.time > timedelayjump) && (IsGrounded() == true))
@@ -219,7 +252,9 @@ public class move : NetworkBehaviour {
 
     public bool IsGroundedTwo()
     {
-        return Physics.Raycast(transform.position, -Vector3.up, distToGround - 0.1f);
+        Debug.Log(distToGround);
+        Debug.Log(Physics.Raycast(transform.position, -Vector3.up, distToGround + 1f));
+        return Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.1f);
     }
     
 

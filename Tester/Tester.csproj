@@ -85,7 +85,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\DediScore.cs" />
     <Compile Include="Assets\FallDown.cs" />
+    <Compile Include="Assets\Licences\Documentation.cs" />
+    <Compile Include="Assets\PlayAgain.cs" />
+    <Compile Include="Assets\PlayerScoreBoardItem.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\GetSetAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\MinAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\TrackballAttribute.cs" />
@@ -131,7 +135,12 @@
     <Compile Include="Assets\PostProcessing\Runtime\Utils\MaterialFactory.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Utils\RenderTextureFactory.cs" />
     <Compile Include="Assets\PostProcessing\Utilities\CustomMotionTexture\ExampleWheelController.cs" />
+    <Compile Include="Assets\Prefabs_2\DeleteAfter.cs" />
+    <Compile Include="Assets\Prefabs_2\jump.cs" />
     <Compile Include="Assets\TowerFall.cs" />
+    <Compile Include="Assets\UJoystick\Content\Script\Core\bl_Joystick.cs" />
+    <Compile Include="Assets\UJoystick\Content\Script\Internal\bl_JoystickUtils.cs" />
+    <Compile Include="Assets\UJoystick\Example\Scrips\bl_ControllerExample.cs" />
     <Compile Include="Assets\cam.cs" />
     <Compile Include="Assets\jumpboost.cs" />
     <Compile Include="Assets\lobby\Scripts\DraggablePanel.cs" />
@@ -146,10 +155,18 @@
     <Compile Include="Assets\lobby\Scripts\Lobby\LobbyServerEntry.cs" />
     <Compile Include="Assets\lobby\Scripts\Lobby\LobbyServerList.cs" />
     <Compile Include="Assets\lobby\Scripts\Lobby\LobbyTopPanel.cs" />
+    <Compile Include="Assets\lobby\Scripts\Lobby\Rotate.cs" />
     <Compile Include="Assets\move.cs" />
     <Compile Include="Assets\scripts\Health.cs" />
+    <Compile Include="Assets\scripts\NetTest.cs" />
+    <Compile Include="Assets\scripts\NetWork.cs" />
     <Compile Include="Assets\scripts\PlayerHealth.cs" />
+    <Compile Include="Assets\scripts\PlayerObject.cs" />
+    <Compile Include="Assets\scripts\ScoreBoard.cs" />
+    <Compile Include="Assets\scripts\Spectate.cs" />
+    <Compile Include="Assets\scripts\SpeedBoost.cs" />
     <Compile Include="Assets\scripts\TeamManager.cs" />
+    <Compile Include="Assets\scripts\Teleport.cs" />
     <Compile Include="Assets\scripts\boucneBack.cs" />
     <Compile Include="Assets\scripts\builder.cs" />
     <Compile Include="Assets\scripts\bullet.cs" />
@@ -173,8 +190,13 @@
     <Compile Include="Assets\scripts\respawner.cs" />
     <Compile Include="Assets\scripts\rotate.cs" />
     <Compile Include="Assets\scripts\setup.cs" />
+    <Compile Include="Assets\scripts\shaky.cs" />
+    <Compile Include="Assets\scripts\showUI.cs" />
     <Compile Include="Assets\scripts\startup.cs" />
     <Compile Include="Assets\scripts\teamscore.cs" />
+    <Compile Include="Assets\scriptsSinglerPlayer\Mover.cs" />
+    <Compile Include="Assets\scriptsSinglerPlayer\friendly.cs" />
+    <Compile Include="Assets\stopFriendly.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\BOXOPHOBIC\Skybox Cubemap Extended\Shaders\Skybox Cubemap Extended.shader" />
@@ -227,6 +249,7 @@
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\WaterInclude.cginc" />
+    <None Include="Assets\UJoystick\ReadMe.txt" />
     <None Include="Assets\lobby\Documentation.txt" />
     <None Include="Assets\lobby\Instruction.txt" />
   </ItemGroup>

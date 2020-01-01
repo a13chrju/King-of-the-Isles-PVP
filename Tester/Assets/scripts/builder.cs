@@ -11,12 +11,13 @@ public class builder : NetworkBehaviour {
     public Camera camera;
     public AudioClip ForceFieldSound;
     private AudioSource source;
+    public float builderTime;
 
     [SyncVar]
     public float cooldown;
 
     public Animator Animator;
-    public bool switcher = false, canbuild = false;
+    public bool switcher = false, canbuild = true;
     //local
     public Image builder_icon;
     // Use this for initialization
@@ -24,7 +25,8 @@ public class builder : NetworkBehaviour {
         Animator = GetComponent<Animator>();
         if (isLocalPlayer)
         {
-            camera = this.GetComponentInChildren<Camera>(); cooldown = Time.time;
+            camera = this.GetComponentInChildren<Camera>();
+            cooldown = Time.time;
             source = GetComponent<AudioSource>();
 
         }
@@ -32,25 +34,49 @@ public class builder : NetworkBehaviour {
         {
             return;
         }
-        builder_icon = GameObject.FindGameObjectWithTag("buildlerUI").GetComponentInChildren<Image>();
-       
+        // 
+
     }
-	
-	// Update is called once per frame
-	void Update () {
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+        //GameObject.Find("buildlerUI").GetComponent<Button>().onClick.AddListener(() => CmdBuilderBuild());
+        builder_icon = GameObject.Find("builder_icon").GetComponent<Image>();
+    }
+  /*  [Command]
+    public void CmdBuilderBuild()
+    {
+        RpcBuildBoi();
+
+    }
+
+    //Client Side.   
+    [ClientRpc]
+    void RpcBuildBoi()
+    {
+        Debug.Log("wall!");
+        if (isLocalPlayer && canbuild == true)
+        {
+            source.PlayOneShot(ForceFieldSound, 1f);
+            Cmdshotanim();
+            cooldown = Time.time + builderTime;
+            Cmdbuild();
+            Cmdreset(2);
+        }
+    }*/
+    // Update is called once per frame
+    void Update () {
  
           if (isLocalPlayer)
           {
 
-              if (Time.time < cooldown && canbuild == false)
+              if (Time.time < cooldown && canbuild == false && builder_icon.fillAmount < 1)
               {
-                  Debug.Log("filling");
                /// 2f * Time.deltaTime;
-                    builder_icon.fillAmount += 1 / 2f * Time.deltaTime;
+                    builder_icon.fillAmount += 1 / builderTime * Time.deltaTime;
                 }
               else if (canbuild == false && Time.time > cooldown)
               {
-                  Debug.Log("ge");
 
                   if (isLocalPlayer)
                   {
@@ -77,41 +103,27 @@ public class builder : NetworkBehaviour {
         
         if (isLocalPlayer)
         {
+
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {
-                if (switcher == false)
-                {
-                    
-                    switcher = true;
-                    placehodler.SetActive(true);
-                    
-
-
-
-                }
-                else
-                {
-                    switcher = false;
-                    placehodler.SetActive(false);
-                }
+               
+                    if (canbuild == true)
+                    {
+                        source.PlayOneShot(ForceFieldSound, 0.5f);
+                        Cmdshotanim();
+                        cooldown = Time.time + builderTime;
+                        Cmdbuild();
+                        Cmdreset(2);
+                    }
 
 
             }
 
-            if (Input.GetKeyDown(KeyCode.E) && canbuild == true)
-            {
-                if (switcher == true)
-                {
-                    source.PlayOneShot(ForceFieldSound, 1f);
-                    Cmdshotanim();
-                    cooldown = Time.time + 2f;
-                    Cmdbuild();
-                    Cmdreset(2);
-                }
-            }
+        
         }
         
     }
+
 
     [Command]
     public void Cmdreset(int timeer)

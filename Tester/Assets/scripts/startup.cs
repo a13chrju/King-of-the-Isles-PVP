@@ -11,14 +11,15 @@ public class startup : NetworkBehaviour {
       
     }
 
-    IEnumerator Example()
+    public IEnumerator Example()
     {
 
         yield return new WaitForSeconds(2);
         
             Debug.Log(TeamManager.AllPlayerLength());
             TeamManager.startGame();
-        
+
+
     }
 
     public override void OnStartClient()

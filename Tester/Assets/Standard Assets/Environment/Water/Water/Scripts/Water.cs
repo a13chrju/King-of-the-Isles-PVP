@@ -207,7 +207,8 @@ namespace UnityStandardAssets.Water
             }
 
             Vector4 waveSpeed = mat.GetVector("WaveSpeed");
-            float waveScale = mat.GetFloat("_WaveScale");
+     
+            float waveScale = 0.4f;// mat.GetFloat("_WaveScale");
             Vector4 waveScale4 = new Vector4(waveScale, waveScale, waveScale * 0.4f, waveScale * 0.45f);
 
             // Time since level load, and do intermediate calculations with doubles

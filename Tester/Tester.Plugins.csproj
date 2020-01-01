@@ -160,6 +160,7 @@
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\FXWater4Simple.shader" />
     <None Include="Assets\Standard Assets\Environment\Water\Water4\Shaders\WaterInclude.cginc" />
+    <None Include="Assets\UJoystick\ReadMe.txt" />
     <None Include="Assets\lobby\Documentation.txt" />
     <None Include="Assets\lobby\Instruction.txt" />
   </ItemGroup>

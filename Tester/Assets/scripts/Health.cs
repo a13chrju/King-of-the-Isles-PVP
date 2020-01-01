@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
+
 public class Health : NetworkBehaviour {
 
     // Use this for initialization
     public Text canvas_txt;
     public GameObject canvas_txt_death;
-    public GameObject canvas_txt_death_child;
+    public GameObject canvas_txt_death_child, canvas_txt_leave_child;
     public GameObject canvaschild;
     public GameObject deathCam;
     
@@ -18,110 +19,208 @@ public class Health : NetworkBehaviour {
     public bool isalive = true;
     public float lasttime = 0;
     public float respawntime = 5f;
+    [SyncVar]
+    public int lastplayer = 0;
+
+    [SyncVar]
+    public int Lives = 3;
+
+    public bool GameNotOver = true;
 
     [SerializeField]
     private Behaviour[] disableonDeath;
 
     private string spectatingplaer = "";
-
+    public bool runonceWin = true;
     private bool runonce = true;
+    public bool canwin;
+
     void Start () {
         
-            canvas_txt = GameObject.FindGameObjectWithTag("awesome").GetComponentInChildren<Text>();
+        canvas_txt = GameObject.FindGameObjectWithTag("awesome").GetComponentInChildren<Text>();
 
-        canvas_txt_death = GameObject.FindGameObjectWithTag("Battletext");
+
         deathCam = GameObject.FindGameObjectWithTag("deathcam");
+        Debug.Log(deathCam);
         deathCam.GetComponentInChildren<Camera>().enabled = false;
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        if (isalive == false && isLocalPlayer && Time.time < lasttime)
+        if (isLocalPlayer && canwin)
         {
-            canvas_txt.text = "You Died. "+ Mathf.Round(lasttime - Time.time).ToString();
-        }
-        if (isalive == false && isLocalPlayer && Time.time >= lasttime && runonce == true)
-        {
-            deathCam.GetComponentInChildren<Camera>().enabled = false;
-            CmdCameraSwitch();
-            canvas_txt.text = "Spectating"; runonce = false;
+            StartCoroutine(checkforwinner());
         }
     }
+
+ 
+    public struct Winner
+    {
+        public string Name;
+        public int Team;
+        public bool WinnerYes;
+        public Winner(string name, int team, bool winner)
+        {
+            Name = name;
+            Team = team;
+            WinnerYes = winner;
+        }
+    }
+
+
+
+
     public void Deathchain()
     {
         if (isLocalPlayer)
         {
             lasttime = Time.time + respawntime;
-            CmdDie();
-        }
-        var name = this.transform.name;
+            CmdDie(Lives);
 
-        if (spectatingplaer == name)
+        }
+    }
+     private IEnumerator checkforwinner()
+     {
+        while (GameNotOver)
         {
-            runonce = true;
+            yield return new WaitForSeconds(2f);
+           
+                int ALiveCount = TeamManager.GetAllPlayerLength();
+
+                Debug.Log(ALiveCount + "YE");
+                if (ALiveCount <= 1 && this.Lives > 0)
+                {
+                    GameNotOver = false;
+                    Debug.Log("YOU WIN!");
+                    TeamManager.youwin();
+                }
+            
         }
-        TeamManager.PlayerRemove(name);
+     
        
-    }
-
-
-    public void CmdCameraSwitch()
+     }
+ 
+  /*  [Command]
+    public void CmdWinnerLast()
     {
-        var player = TeamManager.switchCamera(1);
-        spectatingplaer = player;
-        Debug.Log("TESTTT" + player);
-        GameObject temp2 = (GameObject)GameObject.Find(player);
-        temp2.GetComponentInChildren<Camera>().enabled = true;
+        var countAlive = TeamManager.GetAllPlayerLength();
+        string netID = TeamManager.GetWinner();
+        Debug.Log("OKEJ" + netID);
+        if (countAlive <= 1)
+        {
+            RpcGameEnd(netID);
+        }
+
     }
 
+
+    [ClientRpc]
+    public void RpcGameEnd(string netID)
+    {
+        Debug.Log(netID + " AND " + this.transform.name);
+        if (this.isLocalPlayer && this.transform.name == netID)
+        {
+            TeamManager.youwin();
+        }
+    }*/
 
     [Command]
-    public void CmdDie()
+    public void CmdDie(int lives)
     {
         //Apply it to all other clients
-        Rpcdie();
-        CmdAddCanvasChild();
+        if (this.isalive)
+        {
+            CmdAddCanvasChild(true);
+        }
+        Rpcdie(lives);
+        this.isalive = false;
        
+
     }
 
     [ClientRpc]
-    public void Rpcdie()
+    public void Rpcdie(int lives)
     {
-        var team = GetComponent<setup>().Team; //0 = red, 1 = yellow
-        Debug.Log(team);
-       // this.GetComponent<capture>().removelighteffect();
-       // this.GetComponent<capture>().hideflag();
+     
+
+        if (lives <= 1)
+        {
+            this.Lives = 0;
+            isalive = false;
+            foreach (var obj in disableonDeath) //disable colliders
+            {
+                obj.enabled = false;
+
+            }
+            if (isLocalPlayer)
+            {
+                Image fsa = GameObject.FindGameObjectWithTag("awesome").GetComponentInChildren<Image>();
+                canvas_txt.text = "Spectating\nLeft Click to Switch";
+                fsa.GetComponent<CanvasGroup>().alpha = 0;
+                this.GetComponentInChildren<Camera>().enabled = false; lasttime = Time.time + respawntime;
+                deathCam.GetComponentInChildren<Camera>().enabled = true;
+
+                if (GameNotOver)
+                {
+                    TeamManager.youlose();
+                }
+            
+            }
+
+        }
+        else
+        {
+            if (isLocalPlayer)
+            {
+                deathCam = GameObject.FindGameObjectWithTag("deathcam");
+                canvas_txt.text = "You have " + (lives - 1) + " more lives.";
+                this.GetComponentInChildren<Camera>().enabled = false;
+                deathCam.GetComponentInChildren<Camera>().enabled = true;
+            }
+        
+            this.Lives = lives - 1;
+
+            StartCoroutine(Respawn());
+        }
+
+
+        // this.GetComponent<capture>().removelighteffect();
+        // this.GetComponent<capture>().hideflag();
         // remove score-lightning effect
 
-        isalive = false;
-        foreach (var obj in disableonDeath) //disable colliders
-        {
-            obj.enabled = false;
-
-        }
-        if (isLocalPlayer)
-        {
-            Image fsa =  GameObject.FindGameObjectWithTag("awesome").GetComponentInChildren<Image>();
-            fsa.GetComponent<CanvasGroup>().alpha = 0;
-            this.GetComponentInChildren<Camera>().enabled = false; lasttime = Time.time + respawntime;
-            deathCam.GetComponentInChildren<Camera>().enabled = true;
-        }
-       
-
-       // Debug.Log(transform.name + "DIED!");
 
 
-        //StartCoroutine(Respawn());
+        // Debug.Log(transform.name + "DIED!");
+
+
+        // StartCoroutine(Respawn());
+
+
+
+
 
     }
 
     [Command]
-    public void CmdAddCanvasChild()
+    public void Cmdchangewinn(int value)
     {
-        // GameObject fireball = (GameObject)Instantiate(fireball_prefab, posfire, this.GetComponentInChildren<Camera>().transform.rotation) as GameObject;
-        canvaschild = (GameObject)Instantiate(canvas_txt_death_child, this.transform.position, canvas_txt_death_child.transform.rotation) as GameObject;
+        RpcSetWinnerBool(value);
+    }
+    [ClientRpc]
+    public void RpcSetWinnerBool(int value)
+    {
+        this.lastplayer = value;
+    }
 
-        Debug.Log("hhej" + canvas_txt_death);
+    [Command]
+    public void CmdAddCanvasChild(bool isdeathicon)
+    {
+        
+        canvas_txt_death = GameObject.FindGameObjectWithTag("Battletext");
+        Debug.Log(canvas_txt_death.transform.parent.gameObject);
+        // GameObject fireball = (GameObject)Instantiate(fireball_prefab, posfire, this.GetComponentInChildren<Camera>().transform.rotation) as GameObject;
+        if (isdeathicon)
+        {
+            canvaschild = (GameObject)Instantiate(canvas_txt_death_child, this.transform.position, canvas_txt_death_child.transform.rotation) as GameObject;
+        }
+
+      //  Debug.Log("hhej" + canvas_txt_death);
 
         NetworkServer.Spawn(canvaschild);
         RpcSyncBlockOnce(canvaschild, canvas_txt_death.transform.parent.gameObject);
@@ -140,16 +239,33 @@ public class Health : NetworkBehaviour {
     {
        
         yield return new WaitForSeconds(respawntime);
-        canvas_txt.text = "";
-        RpcSetDefaults();
+           canvas_txt.text = "";
+           RpcSetDefaults();
 
-        Transform _startpoint = NetworkManager.singleton.GetStartPosition();
+           Transform _startpoint = NetworkManager.singleton.GetStartPosition();
 
-        transform.position = _startpoint.position;
-        transform.rotation = _startpoint.rotation;
-        this.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        this.gameObject.GetComponent<move>().resetvelo();
-        
+           transform.position = _startpoint.position;
+           transform.rotation = _startpoint.rotation;
+           this.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+           this.gameObject.GetComponent<move>().resetvelo();
+
+        if (isLocalPlayer)
+        {
+            deathCam.GetComponentInChildren<Camera>().enabled = false;
+            this.GetComponentInChildren<Camera>().enabled = true;
+        }
+        /*  if (isLocalPlayer)
+          {
+              deathCam.GetComponentInChildren<Camera>().enabled = false;
+          }*/
+        // CmdDestroyButton(this.gameObject);
+
+    }
+
+    [Command]
+    public void CmdDestroyButton(GameObject button)
+    {
+        NetworkServer.Destroy(button);
     }
 
 
@@ -158,12 +274,6 @@ public class Health : NetworkBehaviour {
     {
        
         isalive = true;
-
-        if (isLocalPlayer)
-        {
-            deathCam.GetComponentInChildren<Camera>().enabled = false;
-            this.GetComponentInChildren<Camera>().enabled = true;
-        }
 
         foreach (var obj in disableonDeath)
         {

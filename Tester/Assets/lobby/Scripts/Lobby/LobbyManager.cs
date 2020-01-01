@@ -164,6 +164,15 @@ namespace Prototype.NetworkLobby
 			topPanel.isInGame = false;
         }
 
+        public void GoExitButton()
+        {
+            topPanel.isInGame = false;
+            Debug.Log("EXIT");
+            Application.Quit();
+
+           
+        }
+
         // ----------------- Server management
 
         public void AddLocalPlayer()
@@ -311,6 +320,7 @@ namespace Prototype.NetworkLobby
 
         public override void OnLobbyServerDisconnect(NetworkConnection conn)
         {
+            Debug.Log("SOME! LEFT");
             for (int i = 0; i < lobbySlots.Length; ++i)
             {
                 LobbyPlayer p = lobbySlots[i] as LobbyPlayer;
@@ -321,9 +331,11 @@ namespace Prototype.NetworkLobby
                     p.ToggleJoinButton(numPlayers >= minPlayers);
                 }
             }
-
+            
+            //TeamManager.clearAll();
+            
         }
-
+        
         public override bool OnLobbyServerSceneLoadedForPlayer(GameObject lobbyPlayer, GameObject gamePlayer)
         {
             //This hook allows you to apply state data from the lobby-player to the game-player
@@ -408,8 +420,16 @@ namespace Prototype.NetworkLobby
 
         public override void OnClientDisconnect(NetworkConnection conn)
         {
+            Debug.Log("hola");
             base.OnClientDisconnect(conn);
             ChangeTo(mainMenuPanel);
+            
+            // NetworkManager.singleton.StopClient();
+        }
+
+        private void OnDisconnectedFromServer(NetworkDisconnection info)
+        {
+            
         }
 
         public override void OnClientError(NetworkConnection conn, int errorCode)

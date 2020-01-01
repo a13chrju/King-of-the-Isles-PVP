@@ -10,19 +10,13 @@ public class networkLobby : LobbyHook {
     {
         LobbyPlayer lobby = lobbyPlayer.GetComponent<LobbyPlayer>();
         setup localPlayer = gamePlayer.GetComponent<setup>();
-        if (lobby.playerColor == Color.red)
-        {
-            Debug.Log("got em bois");
-            localPlayer.Team = 1;
-        }
-        else
-        {
-            localPlayer.Team = 2;
-        }
-       
+
+        localPlayer.Team = lobby.teampicked;
         localPlayer.TeamColor = lobby.playerColor;
         localPlayer.myname = lobby.playerName;
-        
+        localPlayer.lobbyNetworkID = lobby.GetComponent<NetworkIdentity>().netId.ToString();
+
+
     }
     // Use this for initialization
     void Start () {
@@ -33,4 +27,15 @@ public class networkLobby : LobbyHook {
 	void Update () {
 		
 	}
+
+    private void OnPlayerDisconnected(NetworkPlayer player)
+    {
+        Debug.Log("WOT DISCONNECTED");
+    }
+
+    private void OnDisconnectedFromServer(NetworkDisconnection info)
+    {
+        Debug.Log("WOT OPSI");
+    }
+
 }

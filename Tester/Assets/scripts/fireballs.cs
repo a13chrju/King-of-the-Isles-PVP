@@ -25,8 +25,9 @@ public class fireballs : NetworkBehaviour {
     private AudioSource source;
     private Camera myCamera;
     public bool isgliding = false;
+    public Button fireButton;
     //non local
-    public Image fire_icon;
+    // public Image fire_icon;
 
     //local
     public Image localfire_icon;
@@ -36,50 +37,44 @@ public class fireballs : NetworkBehaviour {
     [SyncVar]
     public bool canfire = true;
 
+
+    public override void OnStartClient()
+    {
+       // fireButton.onClick.AddListener(FireBallShot);
+    }
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+       // GameObject.Find("klickme").GetComponent<Button>().onClick.AddListener(() => CmdFireBallShot()); for mobile
+
+        localfire_icon = GameObject.Find("localfireimage").GetComponent<Image>();
+    }
     void Start () {
+      
+
         lifetime = Time.time + 12f;
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         //fireball_prefab = GameObject.FindGameObjectWithTag("bullet");
-        localfire_icon = GameObject.FindGameObjectWithTag("myuihehe").GetComponentInChildren<Image>();
+     //   localfire_icon = GameObject.FindGameObjectWithTag("myuihehe").GetComponentInChildren<Image>();
         source = GetComponent<AudioSource>();
         myCamera = GetComponentInChildren<Camera>();
      
         if (isLocalPlayer)
         {
             this.GetComponentInChildren<CanvasGroup>().alpha = 0;
+           
         }
     }
     void OnEnable()
     {
-        fire_icon.fillAmount = 0;
+      //  fire_icon.fillAmount = 0;
     }
 
     // Update is called once per frame
     void LateUpdate () {
 
-       /* if (Time.time > lifetime)
-        {
-            if (isServer)
-            {
-                NetworkServer.Destroy(this.gameObject);
-                return;
-            }
-        }*/
-        /* if (fire_icon.fillAmount > 0.99)
-         {
-             fire_icon.fillAmount = 0;
 
-             if (isLocalPlayer)
-             {
-                 Cmdresetnio();
-             }
-             else
-             {
-                 canfire = true;
-             }
-
-         }*/
         if (isLocalPlayer)
         {
             
@@ -91,17 +86,15 @@ public class fireballs : NetworkBehaviour {
             {
 
 
-                if (isLocalPlayer)
-                {
                    
                     Cmdresetnio();
                     localfire_icon.fillAmount = 0;
-                }
+                
               
             }
 
         }
-        else
+       /* else
         {
             if (canfire == false)
             {
@@ -111,20 +104,19 @@ public class fireballs : NetworkBehaviour {
             {
                 fire_icon.fillAmount = 0;
             }
-        }
+        }*/
 
 
         if (isLocalPlayer)
         {
             //CmdCool();
-
-
-
-            if (Input.GetKeyDown(KeyCode.Mouse0) && !anim.GetCurrentAnimatorStateInfo(0).IsName("fireball") && canfire == true)
+       
+            if (Input.GetMouseButtonDown(0) && !anim.GetCurrentAnimatorStateInfo(0).IsName("fireball") && canfire == true)
             {
+                Debug.Log("SHOT");
                 source.PlayOneShot(FireballSound, 1f);
                 cooldown = Time.time + 2f;
-               
+
                 Cmdshot(myCamera.transform.rotation);
                 Cmdshotanim();
                 CmdCantfire(2);
@@ -133,24 +125,38 @@ public class fireballs : NetworkBehaviour {
 
             }
 
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                this.gameObject.GetComponent<Rigidbody>().AddForce(this.gameObject.transform.forward * 100, ForceMode.Impulse);
-                this.isgliding = true;
 
-            }
-
-            if (isgliding == true)
-            {
-                if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)))
-                {
-                    this.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-                    isgliding = false;
-                }
-            }
         }
     }
+/*
+    [Command]
+    public void CmdFireBallShot()
+    {
+        Debug.Log("wwwwww!");
+        RpcFireBoi();
 
+    }
+
+    //Client Side.   
+    [ClientRpc]
+    void RpcFireBoi()
+    {
+        Debug.Log("FIRE!");
+        if (isLocalPlayer && !anim.GetCurrentAnimatorStateInfo(0).IsName("fireball") && canfire == true)
+        {
+            Debug.Log("SHOT");
+            source.PlayOneShot(FireballSound, 1f);
+            cooldown = Time.time + 2f;
+
+            Cmdshot(myCamera.transform.rotation);
+            Cmdshotanim();
+            CmdCantfire(2);
+            RpcShoot();
+
+
+        }
+    }
+    */
     [Command]
     public void CmdCantfire(int timeer)
     {

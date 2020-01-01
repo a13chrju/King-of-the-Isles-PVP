@@ -35,6 +35,8 @@ public class disabelrag : NetworkBehaviour {
     [SyncVar]
     public bool isragdoll = false;
 
+    public float dazetime;
+
 
     void Start () {
         //joiner = connectoir.anchor;
@@ -47,7 +49,7 @@ public class disabelrag : NetworkBehaviour {
         mycanvas = GameObject.FindGameObjectWithTag("dazed");
        // mycanvastxt = mycanvas.GetComponentInChildren<Text>();
 
-        if (!isLocalPlayer)
+      /*  if (!isLocalPlayer)
         {
             if (this.GetComponentInChildren<FixedJoint>() == null)
             {
@@ -55,7 +57,8 @@ public class disabelrag : NetworkBehaviour {
                 this.GetComponentInChildren<FixedJoint>().connectedBody = this.GetComponent<Rigidbody>();
 
             }
-        }
+            ragdollenable_rpcchain();
+        }*/
 
         mycanvasDazerNet.GetComponent<CanvasGroup>().alpha = 0;
         mycanvas.GetComponent<CanvasGroup>().alpha = 0;
@@ -149,12 +152,12 @@ public class disabelrag : NetworkBehaviour {
     }
     public void ragdollenable_rpcchain()
     {
-        Debug.Log("HELLO!!!");
+
         Rpcmovebullet();
 
         if (isServer)
         {
-            Timetostoprag = Time.time + 5f;
+            Timetostoprag = Time.time + dazetime;
         }
     }
     
@@ -162,7 +165,7 @@ public class disabelrag : NetworkBehaviour {
     [ClientRpc]
     public void Rpcmovebullet()
     {
-        Debug.Log("EEEEEE");
+
         // GameObject bullet = ClientScene.FindLocalObject(bullet_id);
         // bullet.GetComponent<Rigidbody>().AddForce(transform.forward * 2000);
         ragdollenable();
@@ -206,9 +209,8 @@ public class disabelrag : NetworkBehaviour {
 
     public void ragdollenable()
     {
-        Timetostoprag = Time.time + 5f;
+        Timetostoprag = Time.time + dazetime;
         RpcTruestop();
-        Debug.Log("OOOOO");
         this.GetComponent<fireballs>().enabled = false;
         this.GetComponent<move>().enabled = false;
         this.GetComponent<Rigidbody>().isKinematic = true;

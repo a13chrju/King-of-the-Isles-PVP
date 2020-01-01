@@ -7,7 +7,7 @@ namespace Prototype.NetworkLobby
     public class LobbyTopPanel : MonoBehaviour
     {
         public bool isInGame = false;
-
+        public bool cursorLocked = true;
         protected bool isDisplayed = true;
         protected Image panelImage;
 
@@ -29,12 +29,22 @@ namespace Prototype.NetworkLobby
 
         }
 
+        public void ClickButton()
+        {
+            ToggleVisibility(!isDisplayed);
+
+
+        }
+
         public void ToggleVisibility(bool visible)
         {
             isDisplayed = visible;
             foreach (Transform t in transform)
             {
-                t.gameObject.SetActive(isDisplayed);
+                if (t.tag != "notSwitchable")
+                {
+                    t.gameObject.SetActive(isDisplayed);
+                }
             }
 
             if (panelImage != null)
