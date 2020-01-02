@@ -6,6 +6,4 @@ The game concept is that you need to push out other players from a platform up i
 
 An alpha version can be downloaded on my website here: http://christopherj-002-site1.gtempurl.com/
 
-#Let me know another site i can upload it too if you feel like its unsafe to have it on my public website.
-
 I am a webprogrammer but I started learning game development as I developed this network based game. : ) Thanks for reading. I'll add a #comment section to my website soon too.
